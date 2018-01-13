@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as fsExtra from "fs-extra";
 import * as rp from "request-promise";
 import { error } from "util";
 import { reject } from "async";
@@ -11,15 +12,15 @@ import * as path from "path";
 export class GutDataRetrieval {
 
     public bookEntries: Array<BookEntity>;
-
+    private originalDirectory: string;
 
     constructor(  @inject("IEntityDbManager") private bookDbManager: BookDbManager) {
         console.log(this.bookDbManager);
     }
 
     public async retrieve(dir: string) {
-        this.bookDbManager.get(0);
         this.bookEntries = new Array<BookEntity>();
+        this.originalDirectory = dir;
         this.searchBooksToRetrieveData(dir);
         // await this.searchBookData();
         console.log("searching ended");
@@ -32,24 +33,36 @@ export class GutDataRetrieval {
             if (stat.isDirectory()) {
                 this.searchBooksToRetrieveData(dir + "/" + file);
             } else {
-                if (file.includes(".htm")) {
-                    this.readFile(dir + "/" + file);
+                if (file.includes("-h.htm")) {
+                    this.readFile(dir, file);
                 }
             }
         }
     }
 
-    private readFile(file: string) {
-        const buffer: string = fs.readFileSync(file, "utf-8");
-        this.createEntry(buffer, file);
+    private readFile(dir: string, file: string) {
+        const buffer: string = fs.readFileSync(dir + "/" + file, "utf-8");
+        const saveDir = this.copyDirectory(dir, file);
+        this.createEntry(buffer, saveDir);
     }
 
-    private createEntry(buffer: string, file: string) {
+    private copyDirectory(dir: string, file: string): string {
+        const folderName = file.substring(0, file.length - 4);
+        if (dir != this.originalDirectory) {
+            fsExtra.copySync(dir, "./src/bookFiles/" + folderName);
+        } else {
+            fs.mkdirSync("./src/bookFiles/" + folderName);
+            fsExtra.copySync(dir + "/" + file, "./src/bookFiles/" + folderName + "/" + file);
+        }
+        return folderName;
+    }
+
+    private createEntry(buffer: string, saveDir: string) {
         // Crear un nuevo objeto a esta altura
         const bookEntry: BookEntity = new BookEntity();
         bookEntry.title = this.getDataFromFile(buffer, "Title: ");
         bookEntry.author.name = this.getDataFromFile(buffer, "Author: ");
-        bookEntry.fileDir = file.substr(file.lastIndexOf("/") + 1);
+        bookEntry.fileDir = saveDir;
         console.log("Pushing entry: " + bookEntry.title);
         this.bookEntries.push(bookEntry);
     }

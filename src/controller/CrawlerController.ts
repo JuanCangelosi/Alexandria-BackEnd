@@ -38,7 +38,7 @@ export class CrawlerController implements interfaces.Controller {
         // console.log("Finished cataloging");
         // console.log(cataloger.bookEntries);
        // const booksData: BookEntryData[] = await cataloger.searchBookData();
-       await this.gutembergRetrieval.searchBookData();
+       // await this.gutembergRetrieval.searchBookData();
     }
 
 }
