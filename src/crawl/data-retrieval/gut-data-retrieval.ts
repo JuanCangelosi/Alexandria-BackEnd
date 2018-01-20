@@ -14,7 +14,7 @@ export class GutDataRetrieval {
     public bookEntries: Array<BookEntity>;
     private originalDirectory: string;
 
-    constructor(  @inject("IEntityDbManager") private bookDbManager: BookDbManager) {
+    constructor(  @inject("BookDbManager") private bookDbManager: BookDbManager) {
         console.log(this.bookDbManager);
     }
 

@@ -9,19 +9,28 @@ import { MongoDbConnection } from "./dbConnection/mongoDbConnection";
 import { interfaces, InversifyExpressServer, TYPE } from "inversify-express-utils";
 import { BookDbManager } from "./entityDbManagement/BookDbManager";
 import { IEntityDbManager } from "./entityDbManagement/IEntityDbManager";
+import { UserDbManager } from "./entityDbManagement/UserDbManager";
 
 // Controller Imports
 import "./controller/BookController";
 import "./controller/CrawlerController";
+import "./controller/LoginController";
+import "./controller/RegisterController";
 import { GutDataRetrieval } from "./crawl/data-retrieval/gut-data-retrieval";
+
+// Authentication Middleware
+import { authenticationMiddleware } from "./authentication.middleware";
+
 
 // connection settings are in the "ormconfig.json" file
 createConnection().then(async connection => {
 
     const container = new Container();
     container.bind<IDbConnection>("IDbConnection").to(MongoDbConnection);
-    container.bind<IEntityDbManager>("IEntityDbManager").to(BookDbManager);
+    container.bind<IEntityDbManager>("BookDbManager").to(BookDbManager);
+    container.bind<IEntityDbManager>("UserDbManager").to(UserDbManager);
     container.bind<GutDataRetrieval>("GutDataRetrieval").to(GutDataRetrieval);
+    container.bind<express.RequestHandler>("AuthenticationMiddleware").toConstantValue(authenticationMiddleware);
     // create express app
     const server = new InversifyExpressServer(container);
     server.setConfig((app) => {

@@ -8,7 +8,7 @@ import { MongoDbConnection } from "../dbConnection/mongoDbConnection";
 @controller("/crawl")
 export class CrawlerController implements interfaces.Controller {
 
-    // @inject("IEntityDbManager") private bookDbManager: BookDbManager;
+    // @inject("BookDbManager") private bookDbManager: BookDbManager;
 
     @inject("GutDataRetrieval") private gutembergRetrieval: GutDataRetrieval;
 

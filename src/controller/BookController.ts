@@ -7,7 +7,7 @@ import { controller, httpGet, interfaces } from "inversify-express-utils";
 
 @controller("/testBook")
 export class BookController implements interfaces.Controller {
-    @inject("IEntityDbManager") private bookDbManager: BookDbManager;
+    @inject("BookDbManager") private bookDbManager: BookDbManager;
 
     @httpGet("/")
     public async getBooks(request: Request, response: Response, next: NextFunction) {
