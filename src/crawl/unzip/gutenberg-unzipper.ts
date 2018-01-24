@@ -1,15 +1,18 @@
 import * as fs from "fs";
 import * as AdmZip from "adm-zip";
+import { injectable } from "inversify";
 
+
+@injectable()
 export class GutenbergUnzipper {
 
     public unzip() {
         this.deleteFolderRecursive("./unzips");
         fs.mkdirSync("./unzips");
-        const zips: string[] = fs.readdirSync("./zips");
+        const zips: string[] = fs.readdirSync("./epubs");
         for (const zip of zips) {
             console.log(zip);
-            const adm = new AdmZip("./zips/" + zip);
+            const adm = new AdmZip("./epubs/" + zip);
             adm.extractAllTo("./unzips");
         }
         console.log("Unzipping done");

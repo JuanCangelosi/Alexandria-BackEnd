@@ -20,6 +20,9 @@ import { GutDataRetrieval } from "./crawl/data-retrieval/gut-data-retrieval";
 
 // Authentication Middleware
 import { authenticationMiddleware } from "./authentication.middleware";
+import { GutenbergCrawler } from "./crawl/webCrawler/test-crawler";
+import { GutenbergUnzipper } from "./crawl/unzip/gutenberg-unzipper";
+import { EbookParser } from "./crawl/parser/ebookParser";
 
 
 // connection settings are in the "ormconfig.json" file
@@ -30,6 +33,9 @@ createConnection().then(async connection => {
     container.bind<IEntityDbManager>("BookDbManager").to(BookDbManager);
     container.bind<IEntityDbManager>("UserDbManager").to(UserDbManager);
     container.bind<GutDataRetrieval>("GutDataRetrieval").to(GutDataRetrieval);
+    container.bind<GutenbergCrawler>("GutenbergCrawler").to(GutenbergCrawler);
+    container.bind<GutenbergUnzipper>("GutenbergUnzipper").to(GutenbergUnzipper);
+    container.bind<EbookParser>("EbookParser").to(EbookParser);
     container.bind<express.RequestHandler>("AuthenticationMiddleware").toConstantValue(authenticationMiddleware);
     // create express app
     const server = new InversifyExpressServer(container);

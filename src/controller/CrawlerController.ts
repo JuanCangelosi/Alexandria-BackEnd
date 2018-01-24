@@ -4,6 +4,9 @@ import { NextFunction, Request, Response } from "express";
 import { BookDbManager } from "../entityDbManagement/BookDbManager";
 import { GutDataRetrieval } from "../crawl/data-retrieval/gut-data-retrieval";
 import { MongoDbConnection } from "../dbConnection/mongoDbConnection";
+import { GutenbergCrawler } from "../crawl/webCrawler/test-crawler";
+import { GutenbergUnzipper } from "../crawl/unzip/gutenberg-unzipper";
+import { EbookParser } from "../crawl/parser/ebookParser";
 
 @controller("/crawl")
 export class CrawlerController implements interfaces.Controller {
@@ -11,34 +14,29 @@ export class CrawlerController implements interfaces.Controller {
     // @inject("BookDbManager") private bookDbManager: BookDbManager;
 
     @inject("GutDataRetrieval") private gutembergRetrieval: GutDataRetrieval;
+    @inject("GutenbergCrawler") private gutenbergCrawler: GutenbergCrawler;
+    @inject("GutenbergUnzipper") private gutenbergUnzipper: GutenbergUnzipper;
+    @inject("EbookParser") private ebookParser: EbookParser;
 
     constructor() {
     }
 
     @httpGet("/get")
     public async getBooks(req: Request, res: Response, next: NextFunction) {
-        // const crawler: GutenbergCrawler = new GutenbergCrawler();
         console.log("getting books");
-        // console.log(this.bookDbManager);
-        // crawler.start();
+        await this.gutenbergCrawler.start();
+    }
+    @httpGet("/parse")
+    public async parse(req: Request, res: Response, next: NextFunction) {
+        console.log("parsing books");
+        const books = await this.ebookParser.parse();
+        await this.gutembergRetrieval.searchBookData(books);
     }
 
     @httpGet("/unzip")
     public async getBooksUnzipped (req: Request, res: Response, next: NextFunction) {
         // const unzipper: GutenbergUnzipper = new GutenbergUnzipper();
         console.log("unzipping books");
-        // unzipper.unzip();
+        this.gutenbergUnzipper.unzip();
     }
-
-    @httpGet("/catalog")
-    public async catalogBooks (req: Request, res: Response, next: NextFunction) {
-        // const cataloger: GutenbergCataloger = new GutenbergCataloger();
-        console.log("cataloging books");
-        await this.gutembergRetrieval.retrieve("./src/unzips");
-        // console.log("Finished cataloging");
-        // console.log(cataloger.bookEntries);
-       // const booksData: BookEntryData[] = await cataloger.searchBookData();
-       // await this.gutembergRetrieval.searchBookData();
-    }
-
 }

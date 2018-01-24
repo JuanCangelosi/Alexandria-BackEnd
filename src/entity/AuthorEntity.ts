@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ObjectID, ObjectIdColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ObjectID, ObjectIdColumn, CreateDateColumn } from "typeorm";
 
 @Entity()
 export class AuthorEntity {
@@ -14,4 +14,7 @@ export class AuthorEntity {
 
     @Column()
     birthYear: number;
+
+    @CreateDateColumn()
+    addDate: Date;
 }

@@ -6,10 +6,13 @@ import * as fs from "fs";
 import { error } from "util";
 import { reject } from "async";
 import * as rp from "request-promise";
+import { injectable } from "inversify";
 
+
+@injectable()
 export class GutenbergCrawler implements IWebCrawler {
 
-    start_url = "http://www.gutenberg.org/robot/harvest?filetypes[]=html&langs[]=es";
+    start_url = "http://www.gutenberg.org/robot/harvest?filetypes[]=epub.images&langs[]=es";
     // search_word = "Hola";
 
     max_pages_to_visit = 10;
@@ -24,6 +27,7 @@ export class GutenbergCrawler implements IWebCrawler {
 
     constructor() {
         console.log("Constructor del crawler");
+        this.createFolder();
         this.pagesToVisit.push(this.start_url);
         // this.start();
     }
@@ -76,9 +80,9 @@ export class GutenbergCrawler implements IWebCrawler {
         relativeLinks.each((index: number, element: CheerioElement) => {
             // console.log(element.attribs.href);
             // i++;
-            if (element.attribs.href.includes(".zip")) {
+            if (element.attribs.href.includes(".epub")) {
                 // myPromises.push(this.downloadLink(element.attribs.href, i));
-                console.log("Downloading: " + index + ".zip");
+                console.log("Downloading: " + index + ".epub");
                 myPromises.push(this.downloadLink(element.attribs.href, index));
             } else {
                 console.log("visit another page with: " + element.attribs.href);
@@ -94,9 +98,9 @@ export class GutenbergCrawler implements IWebCrawler {
         const promise = new Promise<void>((resolve, reject) => {
             console.log("Starting Download: " + link);
             const stream = rp(link, function (err, resp, body) {
-                if (err) throw err;
+                if (err) console.log(err);
             });
-            const wstream = stream.pipe(fs.createWriteStream("./zips/h" + name + ".zip"));
+            const wstream = stream.pipe(fs.createWriteStream("src/epubs/h" + name + ".epub"));
 
             wstream.on("close", () => {
                 console.log(name + "File written!");
@@ -104,6 +108,13 @@ export class GutenbergCrawler implements IWebCrawler {
             });
         });
         return promise;
+    }
+
+    private createFolder() {
+        console.log(__dirname);
+        if (! fs.existsSync("src/epubs")) {
+            fs.mkdirSync("src/epubs");
+        }
     }
 
 }

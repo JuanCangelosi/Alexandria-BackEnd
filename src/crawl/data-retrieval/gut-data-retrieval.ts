@@ -11,85 +11,17 @@ import * as path from "path";
 @injectable()
 export class GutDataRetrieval {
 
-    public bookEntries: Array<BookEntity>;
-    private originalDirectory: string;
 
-    constructor(  @inject("BookDbManager") private bookDbManager: BookDbManager) {
+    constructor( @inject("BookDbManager") private bookDbManager: BookDbManager) {
         console.log(this.bookDbManager);
     }
 
-    public async retrieve(dir: string) {
-        this.bookEntries = new Array<BookEntity>();
-        this.originalDirectory = dir;
-        this.searchBooksToRetrieveData(dir);
-        // await this.searchBookData();
-        console.log("searching ended");
-    }
-
-    private searchBooksToRetrieveData(dir: string) {
-        const files: string[] = fs.readdirSync(dir);
-        for (const file of files) {
-            const stat = fs.statSync(dir + "/" + file);
-            if (stat.isDirectory()) {
-                this.searchBooksToRetrieveData(dir + "/" + file);
-            } else {
-                if (file.includes("-h.htm")) {
-                    this.readFile(dir, file);
-                }
-            }
-        }
-    }
-
-    private readFile(dir: string, file: string) {
-        const buffer: string = fs.readFileSync(dir + "/" + file, "utf-8");
-        const saveDir = this.copyDirectory(dir, file);
-        this.createEntry(buffer, saveDir);
-    }
-
-    private copyDirectory(dir: string, file: string): string {
-        const folderName = file.substring(0, file.length - 4);
-        if (dir != this.originalDirectory) {
-            fsExtra.copySync(dir, "./src/bookFiles/" + folderName);
-        } else {
-            fs.mkdirSync("./src/bookFiles/" + folderName);
-            fsExtra.copySync(dir + "/" + file, "./src/bookFiles/" + folderName + "/" + file);
-        }
-        return folderName;
-    }
-
-    private createEntry(buffer: string, saveDir: string) {
-        // Crear un nuevo objeto a esta altura
-        const bookEntry: BookEntity = new BookEntity();
-        bookEntry.title = this.getDataFromFile(buffer, "Title: ");
-        bookEntry.author.name = this.getDataFromFile(buffer, "Author: ");
-        bookEntry.fileDir = saveDir;
-        console.log("Pushing entry: " + bookEntry.title);
-        this.bookEntries.push(bookEntry);
-    }
-
-    private getDataFromFile(buffer: string, searchField: string): string {
-        const index: number = buffer.indexOf(searchField);
-        const endIndex: number = buffer.indexOf("\r", index);
-        let search = "";
-        if (index > 0 && endIndex > 0) {
-            search = buffer.slice(index, endIndex);
-            search = search.substring(searchField.length);
-            if (search.indexOf("<") > -1) {
-                search = search.slice(index, search.indexOf("<"));
-            }
-            console.log(search);
-        } else {
-            console.log("search not found");
-        }
-        return search;
-    }
-
-    public async searchBookData() {
+    public async searchBookData(bookEntries: BookEntity[]) {
         const completeBooksData: BookEntity[] = new Array<BookEntity>();
         console.log("Searching book data");
         // console.log(this.bookEntries);
-        console.log(this.bookEntries.length);
-        for (const book of this.bookEntries) {
+        console.log(bookEntries.length);
+        for (const book of bookEntries) {
             if (book.title !== "" && book.title !== " ") {
                 let requestFormattedTitle = book.title.trim();
                 requestFormattedTitle = requestFormattedTitle.split(" ").join("+");
@@ -108,22 +40,13 @@ export class GutDataRetrieval {
                         await this.bookDbManager.insert(completeBook);
                     }
                 } catch (error) {
-                    console.log(error);
                 }
             }
         }
     }
 
     private parseJsonIntoBook(json: any, book: BookEntity) {
-        if (json.numFound > 0) {
-            const firstResult = json.docs[0];
-            book.title = firstResult.title_suggest;
-            book.coverDir = firstResult.cover_i;
-            book.author = firstResult.author_name;
-            book.firstPublishYear = firstResult.first_publish_year;
-            book.ISBN = firstResult.isbn;
-            book.language = firstResult.language;
-        }
+        console.log(json);
         return book;
     }
 

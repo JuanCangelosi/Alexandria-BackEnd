@@ -16,14 +16,14 @@ export class BookDbManager implements IEntityDbManager {
     }
 
     public async get(index: number) {
-       const manager = await this._dbConnection.getEntityManager();
-       // manager.find<BookEntity>()
-       return new Promise<BookEntity>(() => {});
+        const manager = await this._dbConnection.getEntityManager();
+        // manager.find<BookEntity>()
+        return new Promise<BookEntity>(() => { });
     }
 
     public async getAll() {
         const manager = await this._dbConnection.getEntityManager();
-        return <Promise<BookEntity[]>> manager.find("BookEntity");
+        return <Promise<BookEntity[]>>manager.find("BookEntity");
     }
 
     public async insert(entity: BookEntity) {
@@ -39,5 +39,16 @@ export class BookDbManager implements IEntityDbManager {
 
     public async update(entity: BookEntity) {
 
+    }
+
+    public async getNewerBooks() {
+        const manager = await this._dbConnection.getEntityManager();
+        const newestBooks = await manager.find("BookEntity", {
+            order: {
+                "addDate": "DESC",
+            },
+            take: 10
+        });
+        return newestBooks;
     }
 }

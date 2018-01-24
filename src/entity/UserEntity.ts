@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ObjectID, ObjectIdColumn, Index } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ObjectID, ObjectIdColumn, Index, CreateDateColumn } from "typeorm";
 @Entity()
 export class UserEntity {
 
@@ -24,6 +24,9 @@ export class UserEntity {
 
     @Column()
     password: string;
+
+    @CreateDateColumn()
+    addDate: Date;
 
     ParseDTO(json: any) {
         if (json) {
