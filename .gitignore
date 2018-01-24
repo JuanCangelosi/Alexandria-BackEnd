@@ -3,4 +3,5 @@ src/**/*.js
 src/**/*.js.map
 src/bookFiles
 src/epubs
+src/unzips
 dist
