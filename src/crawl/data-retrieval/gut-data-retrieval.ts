@@ -13,41 +13,57 @@ export class GutDataRetrieval {
 
 
     constructor( @inject("BookDbManager") private bookDbManager: BookDbManager) {
-        console.log(this.bookDbManager);
     }
 
     public async searchBookData(bookEntries: BookEntity[]) {
         const completeBooksData: BookEntity[] = new Array<BookEntity>();
         console.log("Searching book data");
-        // console.log(this.bookEntries);
-        console.log(bookEntries.length);
         for (const book of bookEntries) {
-            if (book.title !== "" && book.title !== " ") {
-                let requestFormattedTitle = book.title.trim();
-                requestFormattedTitle = requestFormattedTitle.split(" ").join("+");
-                console.log(requestFormattedTitle);
-                const options = {
-                    uri: "http://openlibrary.org/search.json?q=" + requestFormattedTitle,
-                    headers: {
-                        "User-Agent": "Request-Promise"
-                    },
-                    json: true // Automatically parses the JSON string in the response
-                };
-                try {
-                    const resp = await rp(options);
-                    if (resp.statusMessage !== "Bad request") {
-                        const completeBook = this.parseJsonIntoBook(resp, book);
-                        await this.bookDbManager.insert(completeBook);
-                    }
-                } catch (error) {
+            const requestFormattedTitle = this.getFormattedTitle(book);
+            const options = {
+                uri: "http://openlibrary.org/search.json?q=" + requestFormattedTitle,
+                headers: {
+                    "User-Agent": "Request-Promise"
+                },
+                json: true // Automatically parses the JSON string in the response
+            };
+            try {
+                const resp = await rp(options);
+                if (resp.statusCode !== 400) {
+                    const completeBook = this.parseJsonIntoBook(resp, book);
+                    await this.bookDbManager.insert(completeBook);
                 }
+            } catch (error) {
+                console.log(error.message);
             }
         }
     }
 
     private parseJsonIntoBook(json: any, book: BookEntity) {
-        console.log(json);
+        if (json && json.numFound > 0) {
+            if (json.docs[0].first_publish_year) {
+                book.firstPublishYear = json.docs[0].first_publish_year;
+            }
+            if (json.docs[0].isbn) {
+                book.ISBN = json.docs[0].isbn;
+            }
+            if (json.docs[0].subject) {
+                book.subject.push(json.docs[0].subject);
+            }
+            if (json.docs[0].cover_i) {
+                book.coverDir = json.docs[0].cover_i;
+            }
+
+        }
         return book;
+    }
+
+    private getFormattedTitle(book: BookEntity) {
+        let requestFormattedTitle = book.title.trim();
+        requestFormattedTitle = requestFormattedTitle.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        requestFormattedTitle = requestFormattedTitle.split(" ").join("+");
+        console.log(requestFormattedTitle);
+        return requestFormattedTitle;
     }
 
 

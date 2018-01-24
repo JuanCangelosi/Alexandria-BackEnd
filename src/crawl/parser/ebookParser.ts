@@ -15,7 +15,6 @@ export class EbookParser {
         const books = new Array<BookEntity>();
         const zips: string[] = fs.readdirSync("src/epubs");
         for (const zip of zips) {
-            console.log(zip);
             await new Promise((resolve, reject) => {
                 const epub = new Epub("src/epubs/" + zip);
                 epub.on("end", () => {
@@ -28,6 +27,7 @@ export class EbookParser {
                     book.subject = Array<string>();
                     book.subject.push(epub.metadata.subject);
                     book.fileDir = zip;
+                    book.description = epub.description;
                     books.push(book);
                     resolve();
                 });

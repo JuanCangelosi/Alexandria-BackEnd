@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ObjectID, ObjectIdColumn, CreateDateColumn } from "typeorm";
 
 @Entity()
-export class AuthorEntity {
+export class BasicAuthorEntity {
 
     @ObjectIdColumn()
     id: number;
@@ -17,7 +17,4 @@ export class AuthorEntity {
 
     @CreateDateColumn()
     addDate: Date;
-
-    @Column()
-    works: number[];
 }

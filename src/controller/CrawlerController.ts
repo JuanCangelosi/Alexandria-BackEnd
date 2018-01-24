@@ -30,7 +30,7 @@ export class CrawlerController implements interfaces.Controller {
     public async parse(req: Request, res: Response, next: NextFunction) {
         console.log("parsing books");
         const books = await this.ebookParser.parse();
-        await this.gutembergRetrieval.searchBookData(books);
+       // await this.gutembergRetrieval.searchBookData(books);
     }
 
     @httpGet("/unzip")

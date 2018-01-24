@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ObjectID, ObjectIdColumn, CreateDateColumn, Index } from "typeorm";
-import { AuthorEntity } from "./AuthorEntity";
+import { BasicAuthorEntity } from "./BasicAuthorEntity";
 
 @Entity()
 export class BookEntity {
@@ -29,20 +29,23 @@ export class BookEntity {
     language: string;
 
     @Column()
+    description: string;
+
+    @Column()
     subject: string[];
 
     @Column()
     ISBN: string[];
 
-    @Column(type => AuthorEntity)
-    author: AuthorEntity;
+    @Column(type => BasicAuthorEntity)
+    author: BasicAuthorEntity;
 
     @CreateDateColumn()
     @Index()
     addDate: Date;
 
     constructor() {
-        this.author = new AuthorEntity();
+        this.author = new BasicAuthorEntity();
 
     }
 }
